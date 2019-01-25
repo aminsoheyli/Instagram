@@ -113,144 +113,147 @@ public class DirectablesFragment extends Fragment {
     private ArrayList<ProfileCard> homeFragmentInformationsQuery() {
         ArrayList<ProfileCard> informations = new ArrayList<>();
         // Home fragment informations query
-//        MainActivity.db.execSQL("insert into follow values('ahmad','asf')");
-        Cursor c = MainActivity.db.rawQuery("select distinct * from post, follow where post.user_id ='" + MainActivity.currentUserId + "' or follow.follower_id = '" + MainActivity.currentUserId + "' group by post.post_id order by post.post_date desc;", null);
+        Cursor c = MainActivity.db.rawQuery("select * from post left join follow on post.user_id = follow.follower_id where post.user_id ='" + MainActivity.currentUserId + "' or follow.follower_id = '" + MainActivity.currentUserId + "' order by post.post_date desc;", null);
+
         if (c.moveToFirst()) {
             do {
-                Cursor cc = MainActivity.db.rawQuery("select count(user_id) from likes where post_id = '" + c.getString(0) + "';", null);
-                Cursor ccc = MainActivity.db.rawQuery("select count(user_id) from likes where user_id = '" + MainActivity.currentUserId + "' and post_id = '" + c.getString(0) + "';", null);
-                Cursor cccc = MainActivity.db.rawQuery("select count(user_id) from save where user_id = '" + MainActivity.currentUserId + "'  and post_id = '" + c.getString(0) + "';", null);
-                boolean liked = false;
-                boolean saved = false;
-                if (ccc.moveToFirst()) {
-                    liked = (ccc.getString(0).matches("0")) ? false : true;
-                }
-                if (cccc.moveToFirst()) {
-                    saved = (cccc.getString(0).matches("0")) ? false : true;
-                }
-                if (cc.moveToFirst()) {
-                    ProfileCard temp =
-                            new ProfileCard(c.getString(0), BitmapFactory.decodeByteArray(c.getBlob(3), 0, c.getBlob(3).length),
-                                    c.getString(1),
-                                    cc.getString(0),
-                                    c.getString(4),
-                                    c.getString(2),
-                                    liked,
-                                    saved
-                            );
-                    informations.add(temp);
-                    cc.close();
+
+                if (c.moveToFirst()) {
+                    do {
+                        Cursor cc = MainActivity.db.rawQuery("select count(user_id) from likes where post_id = '" + c.getString(0) + "';", null);
+                        Cursor ccc = MainActivity.db.rawQuery("select count(user_id) from likes where user_id = '" + MainActivity.currentUserId + "' and post_id = '" + c.getString(0) + "';", null);
+                        Cursor cccc = MainActivity.db.rawQuery("select count(user_id) from save where user_id = '" + MainActivity.currentUserId + "'  and post_id = '" + c.getString(0) + "';", null);
+                        boolean liked = false;
+                        boolean saved = false;
+                        if (ccc.moveToFirst()) {
+                            liked = (ccc.getString(0).matches("0")) ? false : true;
+                        }
+                        if (cccc.moveToFirst()) {
+                            saved = (cccc.getString(0).matches("0")) ? false : true;
+                        }
+                        if (cc.moveToFirst()) {
+                            ProfileCard temp =
+                                    new ProfileCard(c.getString(0), BitmapFactory.decodeByteArray(c.getBlob(3), 0, c.getBlob(3).length),
+                                            c.getString(1),
+                                            cc.getString(0),
+                                            c.getString(4),
+                                            c.getString(2),
+                                            liked,
+                                            saved
+                                    );
+                            informations.add(temp);
+                            cc.close();
+
+                        }
+                    }
+                    while (c.moveToNext());
 
                 }
+                c.close();
+                return informations;
             }
-            while (c.moveToNext());
 
-        }
-        c.close();
-        return informations;
-    }
-
-    private ArrayList<ProfileCard> globalFragmentInformationsQuery() {
-        //Query --> posts.add(Post)
+            private ArrayList<ProfileCard> globalFragmentInformationsQuery () {
+                //Query --> posts.add(Post)
 //        Cursor c = MainActivity.db.rawQuery("select * from post order by post_date desc;", null);
-        ArrayList<ProfileCard> informations = new ArrayList<>();
-        Cursor c = MainActivity.db.rawQuery("select * from post where user_id !='" + MainActivity.currentUserId + "' group by post_id order by post_date desc;", null);
+                ArrayList<ProfileCard> informations = new ArrayList<>();
+                Cursor c = MainActivity.db.rawQuery("select * from post where user_id !='" + MainActivity.currentUserId + "' group by post_id order by post_date desc;", null);
 
-        if (c.moveToFirst()) {
-            do {
-                Cursor cc = MainActivity.db.rawQuery("select count(user_id) from likes where post_id = '" + c.getString(0) + "';", null);
-                Cursor ccc = MainActivity.db.rawQuery("select count(user_id) from likes where user_id = '" + MainActivity.currentUserId + "' and post_id = '" + c.getString(0) + "';", null);
-                Cursor cccc = MainActivity.db.rawQuery("select count(user_id) from save where user_id = '" + MainActivity.currentUserId + "'  and post_id = '" + c.getString(0) + "';", null);
-                boolean liked = false;
-                boolean saved = false;
-                if (ccc.moveToFirst())
-                    liked = (ccc.getString(0).matches("0")) ? false : true;
-                if (cccc.moveToFirst())
-                    saved = (cccc.getString(0).matches("0")) ? false : true;
-                if (cc.moveToFirst()) {
-                    ProfileCard temp =
-                            new ProfileCard(c.getString(0), BitmapFactory.decodeByteArray(c.getBlob(3), 0, c.getBlob(3).length),
-                                    c.getString(1),
-                                    cc.getString(0),
-                                    c.getString(4),
-                                    c.getString(2),
-                                    liked,
-                                    saved
-                            );
-                    informations.add(temp);
-                    cc.close();
+                if (c.moveToFirst()) {
+                    do {
+                        Cursor cc = MainActivity.db.rawQuery("select count(user_id) from likes where post_id = '" + c.getString(0) + "';", null);
+                        Cursor ccc = MainActivity.db.rawQuery("select count(user_id) from likes where user_id = '" + MainActivity.currentUserId + "' and post_id = '" + c.getString(0) + "';", null);
+                        Cursor cccc = MainActivity.db.rawQuery("select count(user_id) from save where user_id = '" + MainActivity.currentUserId + "'  and post_id = '" + c.getString(0) + "';", null);
+                        boolean liked = false;
+                        boolean saved = false;
+                        if (ccc.moveToFirst())
+                            liked = (ccc.getString(0).matches("0")) ? false : true;
+                        if (cccc.moveToFirst())
+                            saved = (cccc.getString(0).matches("0")) ? false : true;
+                        if (cc.moveToFirst()) {
+                            ProfileCard temp =
+                                    new ProfileCard(c.getString(0), BitmapFactory.decodeByteArray(c.getBlob(3), 0, c.getBlob(3).length),
+                                            c.getString(1),
+                                            cc.getString(0),
+                                            c.getString(4),
+                                            c.getString(2),
+                                            liked,
+                                            saved
+                                    );
+                            informations.add(temp);
+                            cc.close();
+                        }
+                    }
+                    while (c.moveToNext());
+
                 }
+                c.close();
+                return informations;
             }
-            while (c.moveToNext());
 
-        }
-        c.close();
-        return informations;
-    }
-
-    private ArrayList<ProfileCard> savedFragmentInformationsQuery() {
-        ArrayList<ProfileCard> informations = new ArrayList<>();
-        // Saved fragment informations query
+            private ArrayList<ProfileCard> savedFragmentInformationsQuery () {
+                ArrayList<ProfileCard> informations = new ArrayList<>();
+                // Saved fragment informations query
 //Query --> posts.add(Post)
 //        Cursor c = MainActivity.db.rawQuery("select * from post order by post_date desc;", null);
-        Cursor c = MainActivity.db.rawQuery("select distinct * from post, save where save.user_id ='" + MainActivity.currentUserId + "' and save.post_id = post.post_id group by post.post_id order by post.post_date desc;", null);
+                Cursor c = MainActivity.db.rawQuery("select distinct * from post, save where save.user_id ='" + MainActivity.currentUserId + "' and save.post_id = post.post_id group by post.post_id order by post.post_date desc;", null);
 
-        if (c.moveToFirst()) {
-            do {
-                Cursor cc = MainActivity.db.rawQuery("select count(user_id) from likes where post_id = '" + c.getString(0) + "';", null);
-                Cursor ccc = MainActivity.db.rawQuery("select count(user_id) from likes where user_id = '" + MainActivity.currentUserId + "' and post_id = '" + c.getString(0) + "';", null);
-                Cursor cccc = MainActivity.db.rawQuery("select count(user_id) from save where user_id = '" + MainActivity.currentUserId + "'  and post_id = '" + c.getString(0) + "';", null);
-                boolean liked = false;
-                boolean saved = false;
-                if (ccc.moveToFirst()) {
-                    liked = (ccc.getString(0).matches("0")) ? false : true;
+                if (c.moveToFirst()) {
+                    do {
+                        Cursor cc = MainActivity.db.rawQuery("select count(user_id) from likes where post_id = '" + c.getString(0) + "';", null);
+                        Cursor ccc = MainActivity.db.rawQuery("select count(user_id) from likes where user_id = '" + MainActivity.currentUserId + "' and post_id = '" + c.getString(0) + "';", null);
+                        Cursor cccc = MainActivity.db.rawQuery("select count(user_id) from save where user_id = '" + MainActivity.currentUserId + "'  and post_id = '" + c.getString(0) + "';", null);
+                        boolean liked = false;
+                        boolean saved = false;
+                        if (ccc.moveToFirst()) {
+                            liked = (ccc.getString(0).matches("0")) ? false : true;
+                        }
+                        if (cccc.moveToFirst()) {
+                            saved = (cccc.getString(0).matches("0")) ? false : true;
+                        }
+                        if (cc.moveToFirst()) {
+                            ProfileCard temp =
+                                    new ProfileCard(c.getString(0), BitmapFactory.decodeByteArray(c.getBlob(3), 0, c.getBlob(3).length),
+                                            c.getString(1),
+                                            cc.getString(0),
+                                            c.getString(4),
+                                            c.getString(2),
+                                            liked,
+                                            saved
+                                    );
+                            informations.add(temp);
+                            cc.close();
+                        }
+                    }
+                    while (c.moveToNext());
+
                 }
-                if (cccc.moveToFirst()) {
-                    saved = (cccc.getString(0).matches("0")) ? false : true;
-                }
-                if (cc.moveToFirst()) {
-                    ProfileCard temp =
-                            new ProfileCard(c.getString(0), BitmapFactory.decodeByteArray(c.getBlob(3), 0, c.getBlob(3).length),
-                                    c.getString(1),
-                                    cc.getString(0),
-                                    c.getString(4),
-                                    c.getString(2),
-                                    liked,
-                                    saved
-                            );
-                    informations.add(temp);
-                    cc.close();
-                }
+                c.close();
+                return informations;
+
             }
-            while (c.moveToNext());
-
-        }
-        c.close();
-        return informations;
-
-    }
 
 
-    private void onClickListeners() {
+            private void onClickListeners () {
 
-    }
-
-
-    // Query to specify whether the user has a biography or not.
-    private String hasBiography() {
-        return null;
-    }
+            }
 
 
-    int SumHashItem(HashMap<Integer, Integer> hashMap) {
-        int sum = 0;
+            // Query to specify whether the user has a biography or not.
+            private String hasBiography () {
+                return null;
+            }
 
-        for (Map.Entry<Integer, Integer> myItem : hashMap.entrySet()) {
-            sum += myItem.getValue();
-        }
 
-        return sum;
-    }
+            int SumHashItem (HashMap < Integer, Integer > hashMap){
+                int sum = 0;
+
+                for (Map.Entry<Integer, Integer> myItem : hashMap.entrySet()) {
+                    sum += myItem.getValue();
+                }
+
+                return sum;
+            }
 
 //    @Override
 //    public void HeightChange(int position, int height) {
@@ -263,4 +266,4 @@ public class DirectablesFragment extends Fragment {
 //
 //        int i = recyclerViewProfileImages.getLayoutParams().height;
 //    }
-}
+        }
