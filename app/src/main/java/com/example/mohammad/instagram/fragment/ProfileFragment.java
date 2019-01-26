@@ -111,7 +111,12 @@ public class ProfileFragment extends Fragment {
     }
 
     private boolean isFollowedQuery() {
-        return true;
+
+        Cursor c = MainActivity.db.rawQuery("select count(user_id) from follow where user_id = '"+ this.userId +"' and follower_id = '"+MainActivity.currentUserId+"'", null);
+            if (c.moveToFirst()){
+            return (c.getString(0).matches("0")) ? false : true;
+            }
+        return null;
     }
 
     private void prepareNumbers() {
