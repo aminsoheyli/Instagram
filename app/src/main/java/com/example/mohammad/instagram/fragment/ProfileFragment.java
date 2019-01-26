@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -42,6 +41,7 @@ public class ProfileFragment extends Fragment {
     private View followersParent, followingParent;
     private Button editProfile;
     private ProfileType profileType;
+    private boolean isFollowedByLoggedInUser;
     private String userId;
     private RecyclerView recyclerViewProfileImages;
     private View signout;
@@ -59,6 +59,7 @@ public class ProfileFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,14 +96,8 @@ public class ProfileFragment extends Fragment {
         prepareProfileImagesRecyclerView();
 
         if (profileType == ProfileType.CLICKED_USER_PROFILE) {
-            boolean isFollowed = isFollowedQuery();
-            int backgroundId = isFollowed ? R.drawable.follow_button_blue : R.drawable.following_button_white;
-            int textColor = isFollowed ? Color.WHITE : Color.BLACK;
-            String text = isFollowed ? "Following" : "Follow";
-            editProfile.setBackground(getResources().getDrawable(backgroundId));
-            editProfile.setTextColor(textColor);
-            editProfile.setText(text);
-
+            isFollowedByLoggedInUser = isFollowedQuery();
+            changeTheFollowValue(isFollowedByLoggedInUser);
         }
         String bioText;
         if ((bioText = hasBiography()) != null && bioText.length() != 0) {
@@ -265,11 +260,26 @@ public class ProfileFragment extends Fragment {
         editProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getContext(), EditProfileActivity.class);
-                Bundle extras = new Bundle();
-                extras.putInt("Id", 2);
-                intent.putExtra("bundle", extras);
-                startActivityForResult(intent, EDIT_PROFILE_REQ_CODE);
+                switch (profileType) {
+                    case LOGGED_IN_USER_PROFILE:
+                        Intent intent = new Intent(getContext(), EditProfileActivity.class);
+                        Bundle extras = new Bundle();
+                        extras.putInt("Id", 2);
+                        intent.putExtra("bundle", extras);
+                        startActivityForResult(intent, EDIT_PROFILE_REQ_CODE);
+                        break;
+                    case CLICKED_USER_PROFILE:
+                        if (isFollowedByLoggedInUser) {
+                            isFollowedByLoggedInUser = !isFollowedByLoggedInUser;
+                            changeTheFollowValue(isFollowedByLoggedInUser);
+                            unFollowQuery();
+                        } else {
+                            isFollowedByLoggedInUser = !isFollowedByLoggedInUser;
+                            changeTheFollowValue(isFollowedByLoggedInUser);
+                            followQuery();
+                        }
+                        break;
+                }
             }
         });
 
@@ -284,6 +294,18 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    private void changeTheFollowValue(boolean isFollowedByLoggedInUser) {
+
+    }
+
+    private void unFollowQuery() {
+        MainActivity.db.execSQL("delete from follow where follower_id = '" + MainActivity.currentUserId + "' and user_id = '" + this.userId + "'); ");
+
+    }
+
+    private void followQuery() {
+        MainActivity.db.execSQL("insert into follow values('" + this.userId + "','" + MainActivity.currentUserId + "'); ");
+    }
 
     private void showFollowers() {
         ArrayList<String> informations = new ArrayList<>();
