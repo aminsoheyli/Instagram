@@ -114,8 +114,7 @@ public class DirectablesFragment extends Fragment {
         ArrayList<ProfileCard> informations = new ArrayList<>();
         // Home fragment informations query
         Cursor c = MainActivity.db.rawQuery("select * from post left join follow on post.user_id = follow.follower_id where post.user_id ='" + MainActivity.currentUserId + "' or follow.follower_id = '" + MainActivity.currentUserId + "' order by post.post_date desc;", null);
-
-        if (c.moveToFirst()) {
+if (c.moveToFirst()) {
             do {
 
                 if (c.moveToFirst()) {
